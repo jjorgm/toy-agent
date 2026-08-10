@@ -16,10 +16,17 @@ client = OpenAI(
 response = client.chat.completions.create(
     model="openrouter/free",
     messages=[
-        {"role": "user",
+        {
+            "role": "user",
             "content": "Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.",
         }
     ]
 )
+
+if response.usage is not None:
+    print(f"Prompt tokens: {response.usage.prompt_tokens}")
+    print(f"Response tokens: {response.usage.completion_tokens}")
+else:
+    raise RuntimeError("possible failed API request")
 
 print(response.choices[0].message.content)
