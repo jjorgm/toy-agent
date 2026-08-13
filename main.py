@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from prompts import system_prompt
+
 load_dotenv()
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if api_key is None:
@@ -21,11 +23,13 @@ args = parser.parse_args()
 
 messages = [
     {"role": "user", "content": args.user_prompt},
+    {"role": "system", "content": system_prompt},
 ]
 
 response = client.chat.completions.create(
     model="openrouter/free",
     messages=messages,
+    temperature=0,
 )
 
 if response.usage is not None:
