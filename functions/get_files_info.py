@@ -1,6 +1,6 @@
 import os
 
-schema_get_files_info = {
+schema_get_file_info = {
     "type": "function",
     "function": {
         "name": "get_files_info",
@@ -35,7 +35,7 @@ def get_files_info(working_directory: str, directory: str = ".") -> str:
                 name = os.path.basename(item_path)
                 file_size = os.path.getsize(item_path)
                 is_directory = os.path.isdir(item_path)
-                result.append(f'- {name}: file_size={file_size} bytes, is_dir={is_directory}')
-            return '\n'.join(result)
+                result.append(f'- {name}: file_size={file_size} bytes, is_dir={is_directory}')  # pyright: ignore[reportUnknownMemberType]
+            return '\n'.join(result)  # pyright: ignore[reportUnknownArgumentType]
     except (OSError, ValueError) as e:
         return f'Error: {e!s}'

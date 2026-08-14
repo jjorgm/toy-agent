@@ -42,16 +42,16 @@ def run_python_file(
         command = ["python", target_path]
         if args:
             command.extend(args)
-        result = subprocess.run(command, cwd=working_dir_abs, capture_output=True, timeout=30, text=True)
+        result = subprocess.run(command, cwd=working_dir_abs, capture_output=True, timeout=30, text=True)  # noqa: PLW1510
         final_output = []
         if result.returncode != 0:
-            final_output.append(f'Process exited with code {result.returncode}')
+            final_output.append(f'Process exited with code {result.returncode}')  # pyright: ignore[reportUnknownMemberType]
         if not result.stdout and not result.stderr:
-            final_output.append("No output produced")
+            final_output.append("No output produced")  # pyright: ignore[reportUnknownMemberType]
         if result.stdout:
-            final_output.append(f'STDOUT: {result.stdout}')
+            final_output.append(f'STDOUT: {result.stdout}')  # pyright: ignore[reportUnknownMemberType]
         if result.stderr:
-            final_output.append(f'STDERR: {result.stderr}')
-        return '\n'.join(final_output)
-    except Exception as e:
+            final_output.append(f'STDERR: {result.stderr}')  # pyright: ignore[reportUnknownMemberType]
+        return '\n'.join(final_output)  # pyright: ignore[reportUnknownArgumentType]
+    except Exception as e:  # noqa: BLE001
         return f"Error: executing Python file: {e}"

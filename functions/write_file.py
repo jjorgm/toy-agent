@@ -33,7 +33,7 @@ def write_file(working_directory:str, file_path: str, content: str) -> str:
             raise ValueError(f'Error: Cannot write to "{file_path}" as it is a directory')
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
         with open(target_path, 'w') as file:
-            file.write(content)
+            file.write(content)  # pyright: ignore[reportUnusedCallResult]
         return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
     except (OSError, ValueError) as e:
         return f"Error: {e!s}"
