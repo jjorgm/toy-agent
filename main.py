@@ -1,7 +1,6 @@
 import argparse
-import json
 import os
-from queue import Empty
+import sys
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -25,34 +24,39 @@ parser.add_argument("--verbose", action="store_true", help="Enable verbose outpu
 args = parser.parse_args()
 
 messages = [
-    {"role": "user", "content": args.user_prompt},  # pyright: ignore[reportAny]
     {"role": "system", "content": system_prompt},
+    {"role": "user", "content": args.user_prompt},  # pyright: ignore[reportAny]
 ]
 
-response = client.chat.completions.create(
-    model="openrouter/free",
-    messages=messages,  # pyright: ignore[reportArgumentType]
-    temperature=0,
-    tools=available_functions,  # pyright: ignore[reportArgumentType]
-)
+for _ in range(20):
+    response = client.chat.completions.create(
+        model="openrouter/free",
+        messages=messages,  # pyright: ignore[reportArgumentType]
+        temperature=0,
+        tools=available_functions,  # pyright: ignore[reportArgumentType]
+    )
 
-
-if response.usage is not None:
-    if args.verbose:  # pyright: ignore[reportAny]
-        print(f"User prompt: {args.user_prompt}")  # pyright: ignore[reportAny]
-        print(f"Prompt tokens: {response.usage.prompt_tokens}")
-        print(f"Response tokens: {response.usage.completion_tokens}")
+    if response.usage is not None:
+        if args.verbose:  # pyright: ignore[reportAny]
+            print(f"User prompt: {args.user_prompt}")  # pyright: ignore[reportAny]
+            print(f"Prompt tokens: {response.usage.prompt_tokens}")
+            print(f"Response tokens: {response.usage.completion_tokens}")
+    else:
+        raise RuntimeError("possible failed API request")
+    message = response.choices[0].message
+    messages.append(message)
+    if message.tool_calls is not None:
+        for tool_call in message.tool_calls:
+            if tool_call.type == "function":
+                result_message = call_function(tool_call)
+                if not result_message["content"]:
+                    raise Exception("tool content empty")
+                if args.verbose:
+                    print(f"-> {result_message['content']}")
+                messages.append(result_message)
+    else:
+        print(message.content)
+        break
 else:
-    raise RuntimeError("possible failed API request")
-message = response.choices[0].message
-if message.tool_calls is not None:
-    for tool_call in message.tool_calls:
-        if tool_call.type == "function":
-            result_message = call_function(tool_call)
-            if not result_message["content"]:
-                raise Exception("tool content empty")
-            if args.verbose:
-                print(f"-> {result_message['content']}")
-
-else:
-    print(message.content)
+    print("maximum attemps reached, sorry")
+    sys.exit(1)
